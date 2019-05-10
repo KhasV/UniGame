@@ -24,7 +24,7 @@ class InputBox:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
                 # Toggle the active variable.
-                self.active = not self.active
+                self.active = True
             else:
                 self.active = False
             # Change the current color of the input box.
@@ -34,6 +34,7 @@ class InputBox:
                 if event.key == pygame.K_RETURN:
                     print(self.text)
                     self.text = ''
+                    self.active = False
                     flag = True
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]

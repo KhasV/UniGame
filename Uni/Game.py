@@ -4,6 +4,8 @@ import Cloud
 import Powerups
 import InputBox
 import random
+import Zont
+import pymongo
 from random import randrange
 
 pygame.init()
@@ -22,7 +24,7 @@ menu_pic = pygame.image.load('menu1.png').convert_alpha()
 gameover_pic = pygame.image.load('game_over.png').convert_alpha()
 bg = pygame.image.load('fon1.jpg').convert_alpha()
 bul = pygame.image.load('bullet.png').convert_alpha()
-sh = pygame.image.load('shield_gold.png').convert_alpha()
+sh = pygame.image.load('small_zontik.png').convert_alpha()
 heard = pygame.image.load('heard.png').convert_alpha()
 dest_heard = pygame.image.load('heard1.png').convert_alpha()
 pygame.display.set_caption("UniGame")
@@ -39,10 +41,12 @@ clock = pygame.time.Clock()
 cloudGroup = pygame.sprite.Group()
 powGroup = pygame.sprite.Group()
 cd = 0
+mark = False
 
 Cloud.maxCloud = 5
 
 uni = Uni.Uni(50, 460)
+zont = Zont.Zont(uni)
 
 input_box1 = InputBox.InputBox(640 - 150, 360 - 20, 140, 50)
 input_boxes = [input_box1]
@@ -105,11 +109,14 @@ def menu():
     global type_screen
     global run
     global esc
+    global mark
 
     if esc:
-        if Uni.Uni.hp == 0:
-            new_game()
-        type_screen = 1
+        if mark:
+            if Uni.Uni.hp == 0:
+                new_game()
+            type_screen = 1
+            mark = False
 
     pos = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
@@ -141,7 +148,7 @@ def draw_window():
 
     win.blit(bg, (0, 0))
     win.blit(bul, (163, 3))
-    win.blit(sh, (290, 5))
+    win.blit(sh, (283, -3))
 
     if Uni.Uni.hp >= 0:
         win.blit(dest_heard, (1240, 5))
@@ -162,6 +169,8 @@ def draw_window():
                         win.blit(heard, (1112, 5))
 
     win.blit(uni.image, uni.rect)
+    if uni.power != 0:
+        win.blit(zont.image, zont.rect)
     powGroup.draw(win)
     cloudGroup.draw(win)
     Uni.Uni.sun_bullets.draw(win)
@@ -173,6 +182,7 @@ def draw_window():
 
     powGroup.update()
     uni.update()
+    zont.update(uni)
     cloudGroup.update()
     Uni.Uni.sun_bullets.update()
     Cloud.Cloud.cloud_bullets.update()
@@ -183,11 +193,12 @@ def play():
     global cd
     global text_score
     global type_screen
-    
+    global mark
     global esc
 
     if esc:
         type_screen = 0
+        mark = True
 
     move_type = 0
 
@@ -222,19 +233,34 @@ def play():
                 if Uni.Uni.hp == 0:
                     type_screen = 2
                     return
+    if uni.power != 0:
+        if len(pygame.sprite.spritecollide(zont, Cloud.Cloud.cloud_bullets, True, pygame.sprite.collide_mask)):
+            if uni.power == 0:
+                pass
 
-    cloud_dest = len(pygame.sprite.spritecollide(uni, cloudGroup, True, pygame.sprite.collide_mask))
-    if cloud_dest:
+        kek = pygame.sprite.spritecollide(zont, cloudGroup, True, pygame.sprite.collide_mask)
+        if len(kek):
+            Cloud.currentCloud -= len(kek)
+            Uni.Uni.record += len(kek)
+            text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
+            for n in kek:
+                if random.random() > 0.5:
+                    powGroup.add(Powerups.Powerups(n.rect.x, n.rect.y))
+
+    cloud_dest = pygame.sprite.spritecollide(uni, cloudGroup, True, pygame.sprite.collide_mask)
+    if len(cloud_dest):
         if uni.power == 0:
             if Uni.Uni.hp > 0:
                 Uni.Uni.hp -= 1
                 if Uni.Uni.hp == 0:
                     type_screen = 2
                     return
-
-        Cloud.currentCloud -= cloud_dest
-        Uni.Uni.record += cloud_dest
+        Cloud.currentCloud -= len(cloud_dest)
+        Uni.Uni.record += len(cloud_dest)
         text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
+        for n in cloud_dest:
+            if random.random() > 0.5:
+                powGroup.add(Powerups.Powerups(n.rect.x, n.rect.y))
 
     side_type = randrange(1, 3)
 

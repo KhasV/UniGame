@@ -1,7 +1,7 @@
 import pygame
 from random import randrange
 
-powerup_img = [pygame.image.load('energy1.png'), pygame.image.load('shield.png'), pygame.image.load('blueheard.png')]
+powerup_img = [pygame.image.load('energy1.png'), pygame.image.load('zontik.png'), pygame.image.load('blueheard.png')]
 
 
 class Powerups(pygame.sprite.Sprite):
@@ -20,4 +20,4 @@ class Powerups(pygame.sprite.Sprite):
         self.rect.y += self.speed
         if self.rect.top > 720:
             self.kill()
-        # pygame.draw.circle(self.image, (255, 0, 0), (self.rect.centerx - self.rect.x, 20), self.radius)
+        # pygame.draw.circle(sealf.image, (255, 0, 0), (self.rect.centerx - self.rect.x, 20), self.radius)
