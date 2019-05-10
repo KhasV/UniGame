@@ -183,6 +183,7 @@ def play():
     global cd
     global text_score
     global type_screen
+    
     global esc
 
     if esc:
