@@ -7,6 +7,7 @@ COLOR_ACTIVE = pygame.Color('dodgerblue2')
 FONT = pygame.font.Font(None, 60)
 
 flag = False
+info = ""
 
 class InputBox:
 
@@ -19,6 +20,7 @@ class InputBox:
 
     def handle_event(self, event):
         global flag
+        global info
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
@@ -32,7 +34,7 @@ class InputBox:
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_RETURN:
-                    print(self.text)
+                    info = self.text
                     self.text = ''
                     self.active = False
                     flag = True

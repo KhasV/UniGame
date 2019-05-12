@@ -5,13 +5,14 @@ import Powerups
 import InputBox
 import random
 import Zont
-import pymongo
+from pymongo import MongoClient
 from random import randrange
 
 pygame.init()
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 40)
+myfont1 = pygame.font.SysFont('Comic Sans MS', 50)
 myfont2 = pygame.font.SysFont('Comic Sans MS', 80)
 pygame.font.get_fonts()
 
@@ -36,37 +37,57 @@ type_screen = 0
 
 text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
 text_level = myfont.render(f'LEVEL {15}', True, (0, 0, 0))
+record1 = myfont1.render(f'1', True, (0, 180, 30))
+record2 = myfont1.render(f'2', True, (0, 180, 30))
+record3 = myfont1.render(f'3', True, (0, 180, 30))
+record4 = myfont1.render(f'4', True, (0, 180, 30))
+record5 = myfont1.render(f'5', True, (0, 180, 30))
+record6 = myfont1.render(f'6', True, (0, 180, 30))
+record7 = myfont1.render(f'7', True, (0, 180, 30))
+record8 = myfont1.render(f'8', True, (0, 180, 30))
+record9 = myfont1.render(f'9', True, (0, 180, 30))
+record10 = myfont1.render(f'10', True, (0, 180, 30))
+allrecords = [record1, record2, record3, record4, record5, record6, record7, record8, record9, record10]
 
 clock = pygame.time.Clock()
 cloudGroup = pygame.sprite.Group()
 powGroup = pygame.sprite.Group()
 cd = 0
 mark = False
+count = True
 
 Cloud.maxCloud = 5
+
+username = ""
+docs = []
+unirec = []
+
+client = MongoClient()
+db = client.uni_database
+records = db.records
 
 uni = Uni.Uni(50, 460)
 zont = Zont.Zont(uni)
 
 input_box1 = InputBox.InputBox(640 - 150, 360 - 20, 140, 50)
-input_boxes = [input_box1]
-
 
 def user():
     global type_screen
+    global username
 
-    for box in input_boxes:
-        box.update()
+    input_box1.update()
 
     win.fill((30, 30, 30))
-    for box in input_boxes:
-        box.draw(win)
+
+    input_box1.draw(win)
 
     pygame.display.flip()
 
     if InputBox.flag:
         type_screen = 1
         InputBox.flag = False
+
+    username = InputBox.info
 
 
 def new_game():
@@ -87,10 +108,44 @@ def new_game():
     Cloud.Cloud.cloud_bullets = pygame.sprite.Group()
     Uni.Uni.sun_bullets = pygame.sprite.Group()
     powGroup = pygame.sprite.Group()
+    input_box1.text = ''
 
 
 def game_over():
     global type_screen
+    global username
+    global count
+    global docs
+    global unirec
+    global allrecords
+
+    if count:
+
+        unirec = []
+        for record in records.find().sort("Score"):
+            unirec = unirec + [record]
+
+        docs = []
+        for i in range(min(15, records.count())):
+            docs = docs + [unirec[records.count() - 1 - i]]
+
+        for i in range(10):
+            key1 = 'Name'
+            key2 = 'Score'
+            allrecords[i] = myfont1.render(f'{i + 1}. {docs[i][key1]} --> {docs[i][key2]}', True, (0, 255, 0))
+
+
+        records.delete_many({})
+        for doc in docs:
+            key1 = 'Name'
+            key2 = 'Score'
+            newd = {
+                        "Name": doc[key1],
+                        "Score": doc[key2],
+                    }
+            records.insert_one(newd)
+
+        count = False
 
     pos = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
@@ -99,10 +154,14 @@ def game_over():
 
     if 425 <= pos[0] <= 425 + 430 and 420 <= pos[1] <= 420 + 100 and click[0] == 1:
         type_screen = 0
+        count = True
 
     win.blit(gameover_pic, (0, 0))
     win.blit(text_end_score, (522, 70))
+    for i in range(10):
+        win.blit(allrecords[i], (5, 400 + i*30))
     pygame.display.update()
+
 
 
 def menu():
@@ -202,6 +261,14 @@ def play():
 
     move_type = 0
 
+    def unidata():
+        global data
+        data = {
+                    "Name": username,
+                    "Score": Uni.Uni.record,
+                }
+        records.insert_one(data)
+
     hits = pygame.sprite.spritecollide(uni, powGroup, True, pygame.sprite.collide_mask)
     for hit in hits:
         if hit.type == 0:
@@ -232,6 +299,7 @@ def play():
                 Uni.Uni.hp -= 1
                 if Uni.Uni.hp == 0:
                     type_screen = 2
+                    unidata()
                     return
     if uni.power != 0:
         if len(pygame.sprite.spritecollide(zont, Cloud.Cloud.cloud_bullets, True, pygame.sprite.collide_mask)):
@@ -244,7 +312,7 @@ def play():
             Uni.Uni.record += len(kek)
             text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
             for n in kek:
-                if random.random() > 0.5:
+                if random.random() > 0.7:
                     powGroup.add(Powerups.Powerups(n.rect.x, n.rect.y))
 
     cloud_dest = pygame.sprite.spritecollide(uni, cloudGroup, True, pygame.sprite.collide_mask)
@@ -254,12 +322,13 @@ def play():
                 Uni.Uni.hp -= 1
                 if Uni.Uni.hp == 0:
                     type_screen = 2
+                    unidata()
                     return
         Cloud.currentCloud -= len(cloud_dest)
         Uni.Uni.record += len(cloud_dest)
         text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
         for n in cloud_dest:
-            if random.random() > 0.5:
+            if random.random() > 0.7:
                 powGroup.add(Powerups.Powerups(n.rect.x, n.rect.y))
 
     side_type = randrange(1, 3)
@@ -293,8 +362,7 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 esc = True
-        for box in input_boxes:
-            box.handle_event(event)
+        input_box1.handle_event(event)
 
     if type_screen == 0:
         menu()

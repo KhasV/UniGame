@@ -78,11 +78,11 @@ class Uni(pygame.sprite.Sprite):
         if self.cd < 0:
             self.cd = 0
 
-        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.x > -25:
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.x > -100:
             self.rect.x -= self.speed
             self.left = True
             self.right = False
-        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.x < 1280 - 200 + 25:
+        elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.x < 1280 - 200 + 100:
             self.rect.x += self.speed
             self.right = True
             self.left = False
