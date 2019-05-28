@@ -13,7 +13,7 @@ pygame.init()
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 40)
 myfont1 = pygame.font.SysFont('Comic Sans MS', 50)
-myfont2 = pygame.font.SysFont('Comic Sans MS', 80)
+myfont2 = pygame.font.SysFont('Comic Sans MS', 70)
 pygame.font.get_fonts()
 
 icon = pygame.image.load('right.png')
@@ -28,25 +28,35 @@ bul = pygame.image.load('bullet.png').convert_alpha()
 sh = pygame.image.load('small_zontik.png').convert_alpha()
 heard = pygame.image.load('heard.png').convert_alpha()
 dest_heard = pygame.image.load('heard1.png').convert_alpha()
+ent_name = [pygame.image.load('fon2.png'), pygame.image.load('fon2.png'),
+            pygame.image.load('fon2.png'), pygame.image.load('fon2.png'), pygame.image.load('fon3.png'),
+            pygame.image.load('fon3.png'), pygame.image.load('fon3.png'), pygame.image.load('fon3.png'),
+            pygame.image.load('fon4.png'), pygame.image.load('fon4.png'), pygame.image.load('fon4.png'),
+            pygame.image.load('fon4.png')]
+gameovers = [pygame.image.load('game_over2.png'), pygame.image.load('game_over2.png'), pygame.image.load('game_over2.png'),
+             pygame.image.load('game_over2.png'), pygame.image.load('game_over3.png'), pygame.image.load('game_over3.png'),
+             pygame.image.load('game_over3.png'), pygame.image.load('game_over3.png'), pygame.image.load('game_over4.png'),
+             pygame.image.load('game_over4.png'), pygame.image.load('game_over4.png'), pygame.image.load('game_over4.png'),
+             pygame.image.load('game_over5.png'), pygame.image.load('game_over5.png'), pygame.image.load('game_over5.png'),
+             pygame.image.load('game_over5.png')]
 pygame.display.set_caption("UniGame")
 
 run = True
 esc = False
-
 type_screen = 0
 
 text_score = myfont.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
 text_level = myfont.render(f'LEVEL {15}', True, (0, 0, 0))
-record1 = myfont1.render(f'1', True, (0, 180, 30))
-record2 = myfont1.render(f'2', True, (0, 180, 30))
-record3 = myfont1.render(f'3', True, (0, 180, 30))
-record4 = myfont1.render(f'4', True, (0, 180, 30))
-record5 = myfont1.render(f'5', True, (0, 180, 30))
-record6 = myfont1.render(f'6', True, (0, 180, 30))
-record7 = myfont1.render(f'7', True, (0, 180, 30))
-record8 = myfont1.render(f'8', True, (0, 180, 30))
-record9 = myfont1.render(f'9', True, (0, 180, 30))
-record10 = myfont1.render(f'10', True, (0, 180, 30))
+record1 = myfont1.render(f'1', True, (77, 58, 186))
+record2 = myfont1.render(f'2', True, (77, 58, 186))
+record3 = myfont1.render(f'3', True, (77, 58, 186))
+record4 = myfont1.render(f'4', True, (77, 58, 186))
+record5 = myfont1.render(f'5', True, (77, 58, 186))
+record6 = myfont1.render(f'6', True, (77, 58, 186))
+record7 = myfont1.render(f'7', True, (77, 58, 186))
+record8 = myfont1.render(f'8', True, (77, 58, 186))
+record9 = myfont1.render(f'9', True, (77, 58, 186))
+record10 = myfont1.render(f'10', True, (77, 58, 186))
 allrecords = [record1, record2, record3, record4, record5, record6, record7, record8, record9, record10]
 
 clock = pygame.time.Clock()
@@ -69,15 +79,23 @@ records = db.records
 uni = Uni.Uni(50, 460)
 zont = Zont.Zont(uni)
 
+index = 0
+index1 = 0
+
 input_box1 = InputBox.InputBox(640 - 150, 360 - 20, 140, 50)
 
 def user():
     global type_screen
     global username
+    global index
 
     input_box1.update()
 
-    win.fill((30, 30, 30))
+    if index == 11:
+        index = 1
+    else:
+        index += 1
+    win.blit(ent_name[index], (0, 0))
 
     input_box1.draw(win)
 
@@ -118,6 +136,7 @@ def game_over():
     global docs
     global unirec
     global allrecords
+    global index1
 
     if count:
 
@@ -132,8 +151,7 @@ def game_over():
         for i in range(10):
             key1 = 'Name'
             key2 = 'Score'
-            allrecords[i] = myfont1.render(f'{i + 1}. {docs[i][key1]} --> {docs[i][key2]}', True, (0, 255, 0))
-
+            allrecords[i] = myfont1.render(f'{i + 1}. {docs[i][key1]} --> {docs[i][key2]}', True, (77, 100, 186))
 
         records.delete_many({})
         for doc in docs:
@@ -152,14 +170,18 @@ def game_over():
 
     text_end_score = myfont2.render(f'Score : {Uni.Uni.record}', True, (23, 89, 212))
 
-    if 425 <= pos[0] <= 425 + 430 and 420 <= pos[1] <= 420 + 100 and click[0] == 1:
+    if 700 <= pos[0] <= 700 + 430 and 508 <= pos[1] <= 508 + 125 and click[0] == 1:
         type_screen = 0
         count = True
 
-    win.blit(gameover_pic, (0, 0))
-    win.blit(text_end_score, (522, 70))
+    if index1 == 15:
+        index1 = 0
+    else:
+        index1 += 1
+    win.blit(gameovers[index1], (0, 0))
+    win.blit(text_end_score, (522, 5))
     for i in range(10):
-        win.blit(allrecords[i], (5, 400 + i*30))
+        win.blit(allrecords[i], (145, 270 + i * 38))
     pygame.display.update()
 
 
